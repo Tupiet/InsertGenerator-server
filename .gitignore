@@ -1,0 +1,5 @@
+/.DS_Store
+/DocumentRoot/node_modules/
+DocumentRoot/.node_repl_history
+DocumentRoot/.ash_history
+DocumentRoot/.npm/
