@@ -3,3 +3,4 @@
 DocumentRoot/.node_repl_history
 DocumentRoot/.ash_history
 DocumentRoot/.npm/
+DocumentRoot/.DS_Store
