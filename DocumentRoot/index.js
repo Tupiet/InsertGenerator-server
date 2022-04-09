@@ -21,52 +21,52 @@ app.post('/', (req, res) => {
 })
 
 function manageData(response) {
-    let myData = {  }
-
-    for (const element in response.data) {
-        const type = response.data[element]
-
-        switch(type) {
-            case 'Name': 
-                myData[element] = receivedName(element, type, response.info['quantity'])
-                break
-            case 'Street':
-                myData[element] = receivedStreet(element, type, response.info['quantity'])
-                break
-        }
+    let myData = { 
+        data: [  ]
     }
-    
+
+    for (let i = 0; i < response.info['quantity']; i++) {
+        
+        let newElement = {  }
+
+        for (const element in response.data) {
+            const type = response.data[element]
+            const quantity = response.data['quantity']
+
+            switch(type) {
+                case 'Name': 
+                    newElement[element] = receivedName(element, type, quantity)
+                    break
+                case 'Street':
+                    newElement[element] = receivedStreet(element, type, quantity)
+                    break
+            }
+
+        }
+        myData.data.push(newElement)
+
+       
+    }
+            
     return myData
 }
 
 function receivedName(element, type, quantity) {
 
     let currentData = dummyjson.parse(`{
-        "data": [
-            {{#repeat ${quantity}}}
-            {
-                "name": "{{firstName}} {{lastName}}"
-            }
-            {{/repeat}}
-        ]
+        "${element}": "{{firstName}} {{lastName}}"
     }`)
 
-    return JSON.parse(currentData)
+    return JSON.parse(currentData)[element]
 }
 
 function receivedStreet(element, type, quantity) {
 
     let currentData = dummyjson.parse(`{
-        "data": [
-            {{#repeat ${quantity}}}
-            {
-                "street": "{{street}}"
-            }
-            {{/repeat}}
-        ]
+        "${element}": "{{street}}"
     }`)
 
-    return JSON.parse(currentData)
+    return JSON.parse(currentData)[element]
 
 }
 
