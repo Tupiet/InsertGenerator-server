@@ -1,5 +1,6 @@
 const express = require('express')
 const dummyjson = require('dummy-json')
+const fs = require('fs')
 
 const app = express()
 
@@ -28,7 +29,7 @@ function manageData(response) {
 
     for (let i = 0; i < response.info['quantity']; i++) {
 
-        let newElement = "{"
+        let newElement = { }
 
         for (const element in response.data) {
             const type = response.data[element].type
@@ -36,44 +37,38 @@ function manageData(response) {
 
             switch(type) {
                 case 'Name':
-                    newElement += receivedName(element)
+                    newElement[element] = receivedName()
                     break
                 case 'Number':
-                    newElement += receivedNumber(element, extra)
+                    newElement[element] = receivedNumber(extra)
                     break
                 case 'Street':
-                    newElement += receivedStreet(element)
+                    newElement[element] = receivedStreet(element)
                     break
                 case 'Email':
-                    newElement += receivedEmail(element)
+                    newElement[element] = receivedEmail(element)
                     break
                 case 'Phone (house)':
-                    newElement += receivedPhoneHouse(element)
+                    newElement[element] = receivedPhoneHouse(element)
                     break
                 case 'Phone (mobile)':
-                    newElement += receivedPhoneMobile(element)
+                    newElement[element] = receivedPhoneMobile(element)
                     break
                 case 'DNI':
-                    newElement += receivedDNI(element)
+                    newElement[element] = receivedDNI(element)
                     break
                 case 'Date':
-                    newElement += receivedDate(element, extra)
+                    newElement[element] = receivedDate(element, extra)
                     break
                 default:
-                    newElement += receivedError()
+                    newElement[element] = receivedError()
                     break
             }
 
         }
 
-        newElement = newElement.slice(0, -2)
-
-        newElement += `}`
-
-        let elementDummy = dummyjson.parse(newElement)
-
-        console.log(elementDummy)
-        myData.data.push(JSON.parse(elementDummy))
+        console.log(newElement)
+        myData.data.push(newElement)
 
 
     }
@@ -81,17 +76,34 @@ function manageData(response) {
     return myData
 }
 
-function receivedName(element) { return `"${element}": "{{firstName}} {{lastName}}", ` }
-function receivedNumber(element, extra) { 
+function receivedName() { 
+    let data = fs.readFileSync('./data/first-name.json')
+    
+    try {
+        const names = JSON.parse(data)
+        randomNumber = Math.floor(Math.random() * names.length)
+        console.log(randomNumber, names[randomNumber])
+        return names[randomNumber]
+    } catch (err) {
+        console.log("Something went wrong...")
+    }
+}
+function receivedNumber(extra) { 
     let min = extra.min ? extra.min : 0
     let max = extra.max ? extra.max : 100
     console.log(min, max)
-    return `"${element}": "{{int ${min} ${max}}}", ` 
+
+    return Math.floor(Math.random() * (max - min +1)) + min
 }
 function receivedStreet(element) { return `"${element}": "{{street}}", ` }
 function receivedEmail(element) { return `"${element}": "{{email}}", ` }
 function receivedPhoneHouse(element) { return `"${element}": "{{phone \"9xxxxxxxx\"}}", ` }
-function receivedPhoneMobile(element) { return `"${element}": "{{phone \"6xxxxxxxx\"}}", ` }
+function receivedPhoneMobile(element) { 
+    let phone = "6"
+    for (let i = 0; i < 8; i++) {
+        // TODO: Get a random number
+    }
+ }
 function receivedDate(element, extra) { 
     let min = extra.min ? extra.min : '1991-01-01'
     let max = extra.max ? extra.max : new Date().toISOString().slice(0, 10)
@@ -107,7 +119,7 @@ function receivedDNI(element) {
         dni += Math.floor(Math.random() * 10)
     }
     dni += randomLetter().toUpperCase()
-    return `"${element}": "${dni}", `
+    return dni
 }
 
 
