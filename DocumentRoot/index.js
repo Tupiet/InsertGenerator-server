@@ -49,13 +49,13 @@ function manageData(response) {
                     newElement[element] = receivedEmail(element)
                     break
                 case 'Phone (house)':
-                    newElement[element] = receivedPhoneHouse(element)
+                    newElement[element] = receivedPhoneHouse()
                     break
                 case 'Phone (mobile)':
-                    newElement[element] = receivedPhoneMobile(element)
+                    newElement[element] = receivedPhoneMobile()
                     break
                 case 'DNI':
-                    newElement[element] = receivedDNI(element)
+                    newElement[element] = receivedDNI()
                     break
                 case 'Date':
                     newElement[element] = receivedDate(element, extra)
@@ -81,39 +81,50 @@ function receivedName() {
     
     try {
         const names = JSON.parse(data)
-        randomNumber = Math.floor(Math.random() * names.length)
-        console.log(randomNumber, names[randomNumber])
-        return names[randomNumber]
+        random = Math.floor(Math.random() * names.length)
+        console.log(random, names[random])
+        return names[random]
     } catch (err) {
         console.log("Something went wrong...")
     }
 }
 function receivedNumber(extra) { 
-    let min = extra.min ? extra.min : 0
-    let max = extra.max ? extra.max : 100
+    let min = extra.min ? parseInt(extra.min) : 0
+    let max = extra.max ? parseInt(extra.max) : 100
     console.log(min, max)
 
-    return Math.floor(Math.random() * (max - min +1)) + min
+    return randomNumber(min, max)
 }
 function receivedStreet(element) { return `"${element}": "{{street}}", ` }
 function receivedEmail(element) { return `"${element}": "{{email}}", ` }
-function receivedPhoneHouse(element) { return `"${element}": "{{phone \"9xxxxxxxx\"}}", ` }
-function receivedPhoneMobile(element) { 
+function receivedPhoneHouse() { 
+    let phone = "9"
+    for (let i = 0; i < 8; i++) {
+        phone += randomNumber(0, 9)
+    }
+    return parseInt(phone)
+ }
+function receivedPhoneMobile() { 
     let phone = "6"
     for (let i = 0; i < 8; i++) {
-        // TODO: Get a random number
+        phone += randomNumber(0, 9)
     }
+    return parseInt(phone)
  }
 function receivedDate(element, extra) { 
-    let min = extra.min ? extra.min : '1991-01-01'
-    let max = extra.max ? extra.max : new Date().toISOString().slice(0, 10)
+    let min = extra.min ? new Date(extra.min) : new Date('1991-01-01')
+    let max = extra.max ? new Date(extra.max) : new Date()
+
     let format = extra.format ? extra.format : 'YYYY-MM-DD'
     console.log(min, max)
-    return `"${element}": "{{date '${min}' '${max}' '${format}'}}", ` 
+
+    console.log(new Date(+min + Math.random() * (max - min)))
+
+    return new Date(+min + Math.random() * (max - min)).toISOString().slice(0, 10)
 }
 function receivedError() { return `"error": "Something went wrong!", ` }
 
-function receivedDNI(element) {
+function receivedDNI() {
     let dni = ""
     for (let i = 0; i < 8; i++) {
         dni += Math.floor(Math.random() * 10)
@@ -126,6 +137,10 @@ function receivedDNI(element) {
 function randomLetter() {
     const alphabet = "abcdefghijklmnopqrstuvwxyz"
     return alphabet[Math.floor(Math.random() * alphabet.length)]
+}
+
+function randomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min +1)) + min
 }
 
 
