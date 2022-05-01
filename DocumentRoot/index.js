@@ -1,5 +1,4 @@
 const express = require('express')
-const dummyjson = require('dummy-json')
 const fs = require('fs')
 
 const app = express()
@@ -31,22 +30,26 @@ function manageData(response) {
 
         let newElement = { }
 
+        // Guardarà el nom actual (permet sincronitzar noms i correus)
+        let currentName
+
         for (const element in response.data) {
             const type = response.data[element].type
             let extra = response.data[element]
 
             switch(type) {
                 case 'Name':
-                    newElement[element] = receivedName()
+                    currentName = receivedName()
+                    newElement[element] = currentName
                     break
                 case 'Number':
                     newElement[element] = receivedNumber(extra)
                     break
                 case 'Street':
-                    newElement[element] = receivedStreet(element)
+                    newElement[element] = receivedStreet()
                     break
                 case 'Email':
-                    newElement[element] = receivedEmail(element)
+                    newElement[element] = receivedEmail(currentName)
                     break
                 case 'Phone (house)':
                     newElement[element] = receivedPhoneHouse()
@@ -58,19 +61,16 @@ function manageData(response) {
                     newElement[element] = receivedDNI()
                     break
                 case 'Date':
-                    newElement[element] = receivedDate(element, extra)
+                    newElement[element] = receivedDate(extra)
                     break
                 default:
                     newElement[element] = receivedError()
                     break
             }
-
         }
 
         console.log(newElement)
         myData.data.push(newElement)
-
-
     }
 
     return myData
@@ -82,7 +82,6 @@ function receivedName() {
     try {
         const names = JSON.parse(data)
         random = Math.floor(Math.random() * names.length)
-        console.log(random, names[random])
         return names[random]
     } catch (err) {
         console.log("Something went wrong...")
@@ -91,12 +90,26 @@ function receivedName() {
 function receivedNumber(extra) { 
     let min = extra.min ? parseInt(extra.min) : 0
     let max = extra.max ? parseInt(extra.max) : 100
-    console.log(min, max)
 
     return randomNumber(min, max)
 }
-function receivedStreet(element) { return `"${element}": "{{street}}", ` }
-function receivedEmail(element) { return `"${element}": "{{email}}", ` }
+
+function receivedStreet() { 
+    let data = fs.readFileSync('./data/street.json')
+    
+    try {
+        const streets = JSON.parse(data)
+        random = Math.floor(Math.random() * streets.length)
+        return streets[random]
+    } catch (err) {
+        console.log("Something went wrong...")
+    }
+ }
+
+function receivedEmail(currentName) { 
+    return `${currentName.toLowerCase()}@gmail.com`
+ }
+
 function receivedPhoneHouse() { 
     let phone = "9"
     for (let i = 0; i < 8; i++) {
@@ -104,6 +117,7 @@ function receivedPhoneHouse() {
     }
     return parseInt(phone)
  }
+
 function receivedPhoneMobile() { 
     let phone = "6"
     for (let i = 0; i < 8; i++) {
@@ -111,18 +125,17 @@ function receivedPhoneMobile() {
     }
     return parseInt(phone)
  }
-function receivedDate(element, extra) { 
+function receivedDate(extra) { 
     let min = extra.min ? new Date(extra.min) : new Date('1991-01-01')
     let max = extra.max ? new Date(extra.max) : new Date()
 
     let format = extra.format ? extra.format : 'YYYY-MM-DD'
-    console.log(min, max)
 
     console.log(new Date(+min + Math.random() * (max - min)))
 
     return new Date(+min + Math.random() * (max - min)).toISOString().slice(0, 10)
 }
-function receivedError() { return `"error": "Something went wrong!", ` }
+function receivedError() { return "Something went wrong!" }
 
 function receivedDNI() {
     let dni = ""
