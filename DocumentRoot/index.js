@@ -82,7 +82,15 @@ function receivedName() {
     try {
         const names = JSON.parse(data)
         random = Math.floor(Math.random() * names.length)
-        return names[random]
+        let actualName = names[random]
+        let words = actualName.split(" ")
+
+        for(let i = 0; i < words.length; i++) {
+            words[i] = words[i][0].toUpperCase() + words[i].slice(1).toLowerCase()
+        }
+
+        return words.join(" ")
+        
     } catch (err) {
         console.log("Something went wrong...")
     }
@@ -107,7 +115,7 @@ function receivedStreet() {
  }
 
 function receivedEmail(currentName) { 
-    return `${currentName.toLowerCase()}@gmail.com`
+    return `${currentName.toLowerCase().replace(/\s/g, "")}@gmail.com`
  }
 
 function receivedPhoneHouse() { 
