@@ -31,7 +31,7 @@ function manageData(response) {
         let newElement = { }
 
         // Guardarà el nom actual (permet sincronitzar noms i correus)
-        let currentName
+        let currentName = { }
 
         for (const element in response.data) {
             const type = response.data[element].type
@@ -39,8 +39,8 @@ function manageData(response) {
 
             switch(type) {
                 case 'Name':
-                    currentName = receivedName()
-                    newElement[element] = currentName
+                    currentName = receivedName(extra)
+                    newElement[element] = currentName.completeName
                     break
                 case 'Number':
                     newElement[element] = receivedNumber(extra)
@@ -76,24 +76,29 @@ function manageData(response) {
     return myData
 }
 
-function receivedName() { 
-    let data = fs.readFileSync('./data/first-name.json')
-    
-    try {
-        const names = JSON.parse(data)
-        random = Math.floor(Math.random() * names.length)
-        let actualName = names[random]
-        let words = actualName.split(" ")
-
-        for(let i = 0; i < words.length; i++) {
-            words[i] = words[i][0].toUpperCase() + words[i].slice(1).toLowerCase()
-        }
-
-        return words.join(" ")
-        
-    } catch (err) {
-        console.log("Something went wrong...")
+function receivedName(extra) { 
+    let dataToReturn = { 
+        name: randomName('name'),
+        firstSurname: randomName('surname'),
+        lastSurname: randomName('surname'),
+        completeName: ""
     }
+    
+    console.log(extra)
+
+    if (extra.name) {
+        dataToReturn.completeName += dataToReturn.name + " "
+    }
+
+    if (extra.firstSurname) {
+        dataToReturn.completeName += dataToReturn.firstSurname + " "
+    }
+
+    if (extra.lastSurname) {
+        dataToReturn.completeName += dataToReturn.lastSurname + " "
+    }
+
+    return dataToReturn
 }
 function receivedNumber(extra) { 
     let min = extra.min ? parseInt(extra.min) : 0
@@ -112,11 +117,11 @@ function receivedStreet() {
     } catch (err) {
         console.log("Something went wrong...")
     }
- }
+}
 
 function receivedEmail(currentName) { 
-    return `${currentName.toLowerCase().replace(/\s/g, "")}@gmail.com`
- }
+    return `${currentName.name.toLowerCase().replace(/\s/g, "")}@gmail.com`
+}
 
 function receivedPhoneHouse() { 
     let phone = "9"
@@ -124,7 +129,7 @@ function receivedPhoneHouse() {
         phone += randomNumber(0, 9)
     }
     return parseInt(phone)
- }
+}
 
 function receivedPhoneMobile() { 
     let phone = "6"
@@ -132,7 +137,7 @@ function receivedPhoneMobile() {
         phone += randomNumber(0, 9)
     }
     return parseInt(phone)
- }
+}
 function receivedDate(extra) { 
     let min = extra.min ? new Date(extra.min) : new Date('1991-01-01')
     let max = extra.max ? new Date(extra.max) : new Date()
@@ -154,6 +159,25 @@ function receivedDNI() {
     return dni
 }
 
+function randomName(type) {
+    let data 
+    if (type == 'name') data = fs.readFileSync('./data/first-name.json')
+    else data = fs.readFileSync('./data/last-name.json')
+    try {
+        const names = JSON.parse(data)
+        random = Math.floor(Math.random() * names.length)
+        let actualName = names[random]
+        let words = actualName.split(" ")
+        
+        for(let i = 0; i < words.length; i++) {
+            words[i] = words[i][0].toUpperCase() + words[i].slice(1).toLowerCase()
+        }
+        
+        return words.join(" ")
+    } catch (err) {
+        console.log("Something went wrong...")
+    }
+}
 
 function randomLetter() {
     const alphabet = "abcdefghijklmnopqrstuvwxyz"
