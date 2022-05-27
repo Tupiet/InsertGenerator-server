@@ -32,6 +32,7 @@ function manageData(response) {
 
         // Guardarà el nom actual (permet sincronitzar noms i correus)
         let currentName = { }
+        currentName = receivedName({name: true, firstSurname: true, lastSurname: true})
 
         for (const element in response.data) {
             const type = response.data[element].type
@@ -64,7 +65,16 @@ function manageData(response) {
                     newElement[element] = receivedDate(extra)
                     break
                 default:
-                    newElement[element] = receivedError()
+                    let found = false
+                    for (const custom in response.custom) {
+                        console.log(response.custom)
+                        if (element == custom) {
+                            found = true
+                            newElement[element] = receivedCustom(element, response.custom)
+                            //console.log(extra)
+                        }
+                    }
+                    if (!found) newElement[element] = receivedError()
                     break
             }
         }
@@ -97,6 +107,8 @@ function receivedName(extra) {
     if (extra.lastSurname) {
         dataToReturn.completeName += dataToReturn.lastSurname + " "
     }
+
+    dataToReturn.completeName = dataToReturn.completeName.slice(0, -1)
 
     return dataToReturn
 }
@@ -157,6 +169,11 @@ function receivedDNI() {
     }
     dni += randomLetter().toUpperCase()
     return dni
+}
+
+function receivedCustom(name, customValues) {
+    let randomInt = randomNumber(0, customValues[`${name}`].length - 1)
+    return customValues[`${name}`][randomInt]
 }
 
 function randomName(type) {
