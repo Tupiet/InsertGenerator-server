@@ -21,10 +21,13 @@ app.post('/', (req, res) => {
     res.send(result)
 })
 
+
 function manageData(response) {
     let myData = {
         data: [  ]
     }
+    
+    let autoincrement = { }
 
     for (let i = 0; i < response.info['quantity']; i++) {
 
@@ -44,7 +47,7 @@ function manageData(response) {
                     newElement[element] = currentName.completeName
                     break
                 case 'Number':
-                    newElement[element] = receivedNumber(extra)
+                    newElement[element] = receivedNumber(extra, element, autoincrement)
                     break
                 case 'Street':
                     newElement[element] = receivedStreet()
@@ -112,9 +115,28 @@ function receivedName(extra) {
 
     return dataToReturn
 }
-function receivedNumber(extra) { 
-    let min = extra.min ? parseInt(extra.min) : 0
+function receivedNumber(extra, element, autoincrement) {
+    // El valor mínim serà, si se n'ha donat un, aquest. 
+    // Si no, revisarem: és autoincrement? Llavors 1. Del contrari, 0
+    let min = extra.min 
+        ? parseInt(extra.min) 
+        : extra.autoincrement 
+            ? 1
+            : 0
+    
+    // El valor màxim serà, si se n'ha donat un, aquest.
+    // Si no, serà 100
     let max = extra.max ? parseInt(extra.max) : 100
+    
+    if (extra.autoincrement) {
+        if (autoincrement[element]) {
+            return autoincrement[`${element}`]++
+        }
+        else {
+            autoincrement[`${element}`] = min + 1
+            return min
+        }
+    }
 
     return randomNumber(min, max)
 }
